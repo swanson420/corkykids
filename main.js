@@ -1,154 +1,254 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // Configured Boundary Models & Rule Sets
-  const BASE_PRICE = 5.99;
-  const MAX_DIPS = 2;
-  const MAX_QTY = 99; // Enforced quantity upper threshold limit
+/**
+ * Hard Deterministic UX Engine & Pure View Projection Layer
+ */
 
-  // Core Functional System State Engine
-  let quantity = 1;
-  let calculatedSingleItemPrice = BASE_PRICE;
-  let isStateValid = true;
-
-  // Cache Dom Reference Objects 
-  const form = document.getElementById('customization-form');
-  const qtyDisplay = document.getElementById('qty-display');
-  const qtyDecrement = document.getElementById('qty-decrement');
-  const qtyIncrement = document.getElementById('qty-increment');
-  const totalPriceDisplay = document.getElementById('total-price-display');
-  const validationBanner = document.getElementById('validation-summary-banner');
-  const btnSubmit = document.getElementById('btn-submit');
-  
-  const dipCheckboxes = form.querySelectorAll('input[name="dips"]');
-
-  /**
-   * Centralized Validation & State Synchronization Matrix.
-   * Processes limits, pricing segments, and ui class mutations concurrently.
-   */
-  function validateState() {
-    let toppingsSum = 0;
-    let dipsSum = 0;
-    let sideValue = 0;
-    let beverageValue = 0;
-
-    // 1. Group-Based Segmentation & Calculation Matrix
-    const checkedToppings = form.querySelectorAll('input[name="toppings"]:checked');
-    checkedToppings.forEach(el => toppingsSum += parseFloat(el.getAttribute('data-price') || 0));
-
-    const checkedDips = form.querySelectorAll('input[name="dips"]:checked');
-    checkedDips.forEach(el => dipsSum += parseFloat(el.getAttribute('data-price') || 0));
-
-    const checkedSide = form.querySelector('input[name="side"]:checked');
-    if (checkedSide) sideValue = parseFloat(checkedSide.getAttribute('data-price') || 0);
-
-    const checkedBeverage = form.querySelector('input[name="beverage"]:checked');
-    if (checkedBeverage) beverageValue = parseFloat(checkedBeverage.getAttribute('data-price') || 0);
-
-    // 2. Structural Intercept Evaluation (Hard Limits Verification)
-    if (checkedDips.length > MAX_DIPS) {
-      isStateValid = false;
-    } else {
-      isStateValid = true;
+// 1. Safe Structural Initialization With LocalStorage Persistence Sync
+const STORAGE_KEY = "sticky-board-notes";
+const loadPersistedData = () => {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    } catch (e) {
+        console.error("Storage state corruption detected, initializing clean array layout.", e);
+        return [];
     }
+};
 
-    // 3. Preventative Modifier Interface Feedback (Removes reliance on :has())
-    dipCheckboxes.forEach(checkbox => {
-      const parentLabel = checkbox.closest('.control-item');
-      if (checkedDips.length >= MAX_DIPS && !checkbox.checked) {
-        checkbox.disabled = true;
-        if (parentLabel) parentLabel.classList.add('disabled');
-      } else {
-        checkbox.disabled = false;
-        if (parentLabel) parentLabel.classList.remove('disabled');
-      }
-    });
+let BoardState = {
+    notes: loadPersistedData(),
+    mode: "IDLE",
+    activeNoteId: null,
+    buffer: "",
+    error: "NONE"
+};
 
-    // 4. Stepper Component Visual Locks
-    qtyIncrement.disabled = (quantity >= MAX_QTY);
-    qtyDecrement.disabled = (quantity <= 1);
+// Tracking snapshot reference to prevent DOM thrashing loops on buffer updates
+let renderedNotesSnapshot = "";
 
-    // 5. Dynamic Global Canvas Calculations Assembly
-    if (isStateValid) {
-      validationBanner.hidden = true;
-      btnSubmit.disabled = false;
-      
-      calculatedSingleItemPrice = BASE_PRICE + toppingsSum + dipsSum + sideValue + beverageValue;
-      const compoundTotal = calculatedSingleItemPrice * quantity;
-      totalPriceDisplay.textContent = `$${compoundTotal.toFixed(2)}`;
-    } else {
-      validationBanner.hidden = false;
-      btnSubmit.disabled = true;
-      totalPriceDisplay.textContent = '---';
-    }
-  }
+// 2. Pure Utilities
+function getWordCount(text) {
+    const clean = text.trim();
+    return clean === "" ? 0 : clean.split(/\s+/).length;
+}
 
-  // --- Pre-Check Input Selection Prevention Mechanics ---
-  dipCheckboxes.forEach(checkbox => {
-    checkbox.addEventListener('click', (e) => {
-      const checkedCount = form.querySelectorAll('input[name="dips"]:checked').length;
-      
-      // If the action would violate business boundaries, intercept and abort instantly
-      if (checkbox.checked && checkedCount > MAX_DIPS) {
-        e.preventDefault();
-        checkbox.checked = false;
-        validateState();
-      }
-    });
-  });
+// 3. Stateless Reactive Projection View = f(State)
+function projectView() {
+    const canvas = document.getElementById("notes-canvas");
+    const overlay = document.getElementById("workspace-overlay");
+    const title = document.getElementById("workspace-title");
+    const textarea = document.getElementById("workspace-buffer");
+    const errEmpty = document.getElementById("error-banner-empty");
+    const errLimit = document.getElementById("error-banner-limit");
 
-  // --- Stepper Quantity Modification Handlers ---
-  qtyIncrement.addEventListener('click', () => {
-    if (quantity < MAX_QTY) {
-      quantity++;
-      qtyDisplay.textContent = quantity;
-      validateState();
-    }
-  });
+    if (!canvas || !overlay || !title || !textarea || !errEmpty || !errLimit) return;
 
-  qtyDecrement.addEventListener('click', () => {
-    if (quantity > 1) {
-      quantity--;
-      qtyDisplay.textContent = quantity;
-      validateState();
-    }
-  });
-
-  // --- Dynamic Form Event Core Listening Layer ---
-  form.addEventListener('change', () => {
-    validateState();
-  });
-
-  // --- Deterministic Submit Finalization Chain ---
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
+    // Structural Render Optimization Guard: Only repaint grid when contents or sorting arrays change
+    const currentSnapshot = JSON.stringify(BoardState.notes.map(n => ({ id: n.id, text: n.text, up: n.updatedAt })));
     
-    // Execute a comprehensive top-down runtime check validation run
-    validateState();
+    if (renderedNotesSnapshot !== currentSnapshot) {
+        canvas.innerHTML = "";
+        
+        // Sorting resolution targeting: (updatedAt || createdAt)
+        [...BoardState.notes]
+            .sort((a, b) => {
+                const timeA = a.updatedAt || a.createdAt;
+                const timeB = b.updatedAt || b.createdAt;
+                return timeB - timeA;
+            })
+            .forEach(note => {
+                const card = document.createElement("div");
+                card.className = "sticky-note-card";
+                
+                const targetTimestamp = note.updatedAt || note.createdAt;
+                const dateStr = new Date(targetTimestamp).toLocaleDateString(undefined, {
+                    month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
+                });
+                
+                const prefixLabel = note.updatedAt ? "Edited" : "Created";
 
-    const checkedDipsCount = form.querySelectorAll('input[name="dips"]:checked').length;
-
-    // Comprehensive Fallback Safety Checks Block Blockade
-    if (!isStateValid || checkedDipsCount > MAX_DIPS || quantity > MAX_QTY || quantity < 1) {
-      validationBanner.hidden = false;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
+                card.innerHTML = `
+                    <div class="note-body"></div>
+                    <div class="note-footer">
+                        <span class="note-timestamp">${prefixLabel}: ${dateStr}</span>
+                        <div class="note-actions">
+                            <button class="btn btn-secondary btn-sm" data-action="edit" data-id="${note.id}">Edit</button>
+                            <button class="btn btn-danger btn-sm" data-action="delete" data-id="${note.id}">Delete</button>
+                        </div>
+                    </div>
+                `;
+                card.querySelector(".note-body").textContent = note.text;
+                canvas.appendChild(card);
+            });
+        
+        renderedNotesSnapshot = currentSnapshot;
     }
 
-    // Assembly configuration packaging payload pipeline
-    const formData = new FormData(form);
-    const orderPayload = {
-      item: "Classic Double Cheeseburger",
-      quantity: quantity,
-      toppings: formData.getAll('toppings'),
-      dips: formData.getAll('dips'),
-      side: formData.get('side'),
-      beverage: formData.get('beverage'),
-      totalPaid: (calculatedSingleItemPrice * quantity).toFixed(2)
-    };
+    // Workspace modal sync processing 
+    if (BoardState.mode === "CREATE_EDITING" || BoardState.mode === "EDITING") {
+        overlay.classList.remove("hidden");
+        title.textContent = BoardState.mode === "CREATE_EDITING" ? "Create New Note" : "Edit Note";
+        
+        // Fix Caret Desync Loop: Safely align input values without throwing cursor indexes
+        if (textarea.value !== BoardState.buffer) {
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            textarea.value = BoardState.buffer;
+            textarea.setSelectionRange(start, end);
+        }
+    } else {
+        overlay.classList.add("hidden");
+        textarea.value = "";
+    }
 
-    console.log('Production System Validated Payload Packaged:', orderPayload);
-    alert(`Order Confirmed! Total: $${orderPayload.totalPaid}`);
-  });
+    // Diagnostic visibility status projections
+    errEmpty.classList.toggle("hidden", BoardState.error !== "EMPTY_TEXT");
+    errLimit.classList.toggle("hidden", BoardState.error !== "WORD_LIMIT_EXCEEDED");
+}
 
-  // Execute initialization loop pass
-  validateState();
+// 4. Reactive Effect Processing Infrastructure (Sprint 3 Hook Ready)
+function runEffects(previousState, currentState) {
+    if (JSON.stringify(previousState.notes) !== JSON.stringify(currentState.notes)) {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(currentState.notes));
+        } catch (e) {
+            console.error("Failed to commit state payload transaction to localStorage channel:", e);
+        }
+    }
+}
+
+// 5. Deterministic State Transition Matrix Engine
+function dispatch(eventType, payload = {}) {
+    // Generate immutable state snapshot prior to mutation execution boundaries
+    const previousState = JSON.parse(JSON.stringify(BoardState));
+
+    switch (eventType) {
+        case "CREATE_NOTE":
+            if (BoardState.mode === "IDLE") {
+                BoardState.mode = "CREATE_EDITING";
+                BoardState.activeNoteId = null;
+                BoardState.buffer = "";
+                BoardState.error = "NONE";
+            }
+            break;
+
+        case "EDIT_NOTE":
+            if (BoardState.mode === "IDLE") {
+                const target = BoardState.notes.find(n => n.id === payload.id);
+                if (target) {
+                    BoardState.mode = "EDITING";
+                    BoardState.activeNoteId = payload.id;
+                    BoardState.buffer = target.text;
+                    BoardState.error = "NONE";
+                }
+            }
+            break;
+
+        case "BUFFER_UPDATE":
+            if (BoardState.mode === "CREATE_EDITING" || BoardState.mode === "EDITING") {
+                BoardState.buffer = payload.text;
+                if (getWordCount(BoardState.buffer) > 50) {
+                    BoardState.error = "WORD_LIMIT_EXCEEDED";
+                } else {
+                    BoardState.error = "NONE";
+                }
+            }
+            break;
+
+        case "CANCEL":
+            if (BoardState.mode === "CREATE_EDITING" || BoardState.mode === "EDITING") {
+                BoardState.mode = "IDLE";
+                BoardState.activeNoteId = null;
+                BoardState.buffer = "";
+                BoardState.error = "NONE";
+            }
+            break;
+
+        case "SAVE":
+            if (BoardState.mode === "CREATE_EDITING" || BoardState.mode === "EDITING") {
+                const cleanText = BoardState.buffer.trim();
+                const wordCount = getWordCount(BoardState.buffer);
+
+                if (cleanText === "") {
+                    BoardState.error = "EMPTY_TEXT";
+                    break;
+                }
+                if (wordCount > 50) {
+                    BoardState.error = "WORD_LIMIT_EXCEEDED";
+                    break;
+                }
+
+                if (BoardState.mode === "CREATE_EDITING") {
+                    BoardState.notes.push({
+                        id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36),
+                        text: BoardState.buffer,
+                        createdAt: Date.now(),
+                        updatedAt: null // Explicit initialization tracking lifecycle properties
+                    });
+                } else if (BoardState.mode === "EDITING") {
+                    BoardState.notes = BoardState.notes.map(note =>
+                        note.id === BoardState.activeNoteId 
+                            ? { ...note, text: BoardState.buffer, updatedAt: Date.now() } // Preserving createdAt natively
+                            : note
+                    );
+                }
+
+                BoardState.mode = "IDLE";
+                BoardState.activeNoteId = null;
+                BoardState.buffer = "";
+                BoardState.error = "NONE";
+            }
+            break;
+
+        case "DELETE_NOTE":
+            BoardState.notes = BoardState.notes.filter(note => note.id !== payload.id);
+            if (BoardState.activeNoteId === payload.id) {
+                BoardState.mode = "IDLE";
+                BoardState.activeNoteId = null;
+                BoardState.buffer = "";
+                BoardState.error = "NONE";
+            }
+            break;
+    }
+    
+    // Cycle synchronization sequence loop locks
+    projectView();
+    runEffects(previousState, BoardState);
+}
+
+// 6. Global Event Attaching Execution Management
+document.addEventListener("DOMContentLoaded", () => {
+    // Top levels selectors
+    document.getElementById("action-create")?.addEventListener("click", () => dispatch("CREATE_NOTE"));
+    document.getElementById("action-cancel")?.addEventListener("click", () => dispatch("CANCEL"));
+    document.getElementById("action-save")?.addEventListener("click", () => dispatch("SAVE"));
+    document.getElementById("workspace-buffer")?.addEventListener("input", (e) => dispatch("BUFFER_UPDATE", { text: e.target.value }));
+    
+    const overlay = document.getElementById("workspace-overlay");
+    overlay?.addEventListener("click", (e) => {
+        if (e.target === overlay) dispatch("CANCEL");
+    });
+
+    // Clean Keyboard Escape Handling for Accessible Modals
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && (BoardState.mode === "CREATE_EDITING" || BoardState.mode === "EDITING")) {
+            dispatch("CANCEL");
+        }
+    });
+
+    // Sprint 2: High Scalability Canvas Event Delegation 
+    document.getElementById("notes-canvas")?.addEventListener("click", (e) => {
+        const actionButton = e.target.closest("button[data-action]");
+        if (!actionButton) return;
+        
+        const action = actionButton.getAttribute("data-action");
+        const noteId = actionButton.getAttribute("data-id");
+        
+        if (action === "edit") {
+            dispatch("EDIT_NOTE", { id: noteId });
+        } else if (action === "delete") {
+            dispatch("DELETE_NOTE", { id: noteId });
+        }
+    });
+
+    // Execute Initial Board Core Projection Frame
+    projectView();
 });
