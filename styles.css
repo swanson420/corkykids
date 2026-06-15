@@ -1,0 +1,285 @@
+/* --- Global Architectural Tokens (Fully Defined All-Dark System) --- */
+:root {
+  --color-canvas-bg: #121212;        /* 60% Composition Deep Base */
+  --color-surface-bg: #1e1e1e;       /* Container Surfaces */
+  --color-surface-elevated: #2a2a2a; /* Row Layout Modifiers */
+  
+  --color-text-primary: #f5f5f5;    /* 30% Composition Reading Scope */
+  --color-text-muted: #aaaaaa;
+  
+  --color-brand-accent: #e63946;    /* 10% Composition Design System */
+  --color-brand-hover: #ff4d5a;
+  --color-brand-disabled: #3a2224;
+  
+  --color-border: #333333;
+  --color-error: #ff4a5a;
+  --color-error-bg: #2c1618;
+  
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--color-canvas-bg);
+  color: var(--color-text-primary);
+  display: flex;
+  justify-content: center;
+}
+
+/* --- Rigid Component Layout Container --- */
+.app-container {
+  width: 100%;
+  max-width: 480px;
+  background-color: var(--color-canvas-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+  border-left: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+}
+
+/* --- Core Header Architecture --- */
+.app-header {
+  background-color: var(--color-surface-bg);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  margin-right: 16px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-header h1 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* --- Scrollable Main Panel Space --- */
+.main-content {
+  flex: 1;
+  padding-bottom: 110px; 
+}
+
+.item-hero {
+  background-color: var(--color-surface-bg);
+  padding: 20px 16px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.item-details h2 {
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+
+.item-description {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.base-price {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* --- Structural Sub-category Scopes --- */
+.options-group {
+  border: none;
+  background-color: var(--color-surface-bg);
+  margin-bottom: 8px;
+  padding: 16px;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.group-legend {
+  width: 100%;
+  float: left;
+  margin-bottom: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.hint-text {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-left: 8px;
+  font-weight: 400;
+}
+
+/* --- Target Control List Rows --- */
+.control-list {
+  display: flex;
+  flex-direction: column;
+  clear: both;
+}
+
+.control-item {
+  display: flex;
+  align-items: center;
+  min-height: 48px; /* High-density thumb hit target envelope constraint */
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  background-color: var(--color-surface-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.control-item:hover:not(.disabled) {
+  background-color: var(--color-surface-elevated);
+}
+
+/* Explicit class assignment replacing legacy dynamic :has() dependencies */
+.control-item.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.control-item input[type="checkbox"],
+.control-item input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  margin-right: 14px;
+  accent-color: var(--color-brand-accent);
+  cursor: pointer;
+}
+
+.control-item input:disabled {
+  cursor: not-allowed;
+}
+
+.control-label {
+  font-size: 15px;
+  flex: 1;
+}
+
+.modifier-price {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+/* --- Comprehensive Validation Summary Banner --- */
+.error-banner {
+  background-color: var(--color-error-bg);
+  color: var(--color-error);
+  padding: 12px;
+  border: 1px solid var(--color-error);
+  font-size: 14px;
+  font-weight: 600;
+  margin: 12px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+/* --- Floor Locked Persistent Utility Footer --- */
+.app-footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  max-width: 480px;
+  background-color: var(--color-surface-bg);
+  border-top: 1px solid var(--color-border);
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  z-index: 10;
+}
+
+/* --- Counter Stepper Component Matrix --- */
+.quantity-container {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--color-canvas-bg);
+}
+
+.btn-qty {
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.btn-qty:disabled {
+  color: #444444;
+  cursor: not-allowed;
+}
+
+.btn-qty:not(:disabled):hover {
+  background-color: var(--color-surface-elevated);
+}
+
+#qty-display {
+  min-width: 32px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+/* --- High-Intent CTA System Target --- */
+.btn-submit {
+  flex: 1;
+  height: 44px;
+  background-color: var(--color-brand-accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+
+.btn-submit:disabled {
+  background-color: var(--color-brand-disabled);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.btn-submit:not(:disabled):hover {
+  background-color: var(--color-brand-hover);
+}
