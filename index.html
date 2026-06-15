@@ -1,141 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Customize Item - WebShifter Delivery</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sticky Notes Board - Deterministic Engine</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="app-container">
     <header class="app-header">
-      <button class="btn-close" aria-label="Close configuration" type="button">&times;</button>
-      <h1>Customize Item</h1>
+        <h1>Sticky Board</h1>
+        <button id="action-create" class="btn btn-primary" aria-haspopup="dialog" aria-controls="workspace-overlay">+ Create New Note</button>
     </header>
 
-    <main class="main-content">
-      <section class="item-hero">
-        <div class="item-details">
-          <h2>Classic Double Cheeseburger</h2>
-          <p class="item-description">Juicy, flame-broiled beef patties with melted cheese, prepared exactly how you like it.</p>
-          <span class="base-price">$5.99</span>
-        </div>
-      </section>
-
-      <div id="validation-summary-banner" class="error-banner" hidden>Please resolve the highlighted item constraints before submitting.</div>
-
-      <form id="customization-form" novalidate>
-        <fieldset class="options-group" id="group-toppings">
-          <legend class="group-legend">Choose Your Extra Toppings</legend>
-          <div class="control-list">
-            <label class="control-item item-checkbox">
-              <input type="checkbox" name="toppings" value="pickles" data-price="0.25">
-              <span class="control-label">Extra Pickles</span>
-              <span class="modifier-price">+$0.25</span>
-            </label>
-            <label class="control-item item-checkbox">
-              <input type="checkbox" name="toppings" value="mayo" data-price="0.00">
-              <span class="control-label">Extra Mayonnaise</span>
-              <span class="modifier-price">Free</span>
-            </label>
-            <label class="control-item item-checkbox">
-              <input type="checkbox" name="toppings" value="onions" data-price="0.15">
-              <span class="control-label">Extra Onions</span>
-              <span class="modifier-price">+$0.15</span>
-            </label>
-          </div>
-        </fieldset>
-
-        <fieldset class="options-group" id="group-dips">
-          <legend class="group-legend">
-            Select Dipping Sauces 
-            <span class="hint-text">Maximum of 2 options allowed</span>
-          </legend>
-          <div class="control-list">
-            <label class="control-item item-checkbox">
-              <input type="checkbox" name="dips" value="ranch" data-price="0.50">
-              <span class="control-label">Creamy Ranch</span>
-              <span class="modifier-price">+$0.50</span>
-            </label>
-            <label class="control-item item-checkbox">
-              <input type="checkbox" name="dips" value="zesty" data-price="0.50">
-              <span class="control-label">Zesty Dipping Sauce</span>
-              <span class="modifier-price">+$0.50</span>
-            </label>
-            <label class="control-item item-checkbox">
-              <input type="checkbox" name="dips" value="caesar" data-price="0.50">
-              <span class="control-label">Caesar Dip</span>
-              <span class="modifier-price">+$0.50</span>
-            </label>
-          </div>
-        </fieldset>
-
-        <fieldset class="options-group" id="group-sides">
-          <legend class="group-legend">Add a Side</legend>
-          <div class="control-list">
-            <label class="control-item item-radio">
-              <input type="radio" name="side" value="none" data-price="0.00" checked>
-              <span class="control-label">No Side</span>
-              <span class="modifier-price">+$0.00</span>
-            </label>
-            <label class="control-item item-radio">
-              <input type="radio" name="side" value="onion-rings" data-price="2.29">
-              <span class="control-label">Onion Rings</span>
-              <span class="modifier-price">+$2.29</span>
-            </label>
-            <label class="control-item item-radio">
-              <input type="radio" name="side" value="curly-fries" data-price="2.49">
-              <span class="control-label">Curly Fries</span>
-              <span class="modifier-price">+$2.49</span>
-            </label>
-            <label class="control-item item-radio">
-              <input type="radio" name="side" value="jalapeno-bites" data-price="2.99">
-              <span class="control-label">Jalapeño Cheddar Bites</span>
-              <span class="modifier-price">+$2.99</span>
-            </label>
-          </div>
-        </fieldset>
-
-        <fieldset class="options-group" id="group-beverages">
-          <legend class="group-legend">Choose a Beverage</legend>
-          <div class="control-list">
-            <label class="control-item item-radio">
-              <input type="radio" name="beverage" value="none" data-price="0.00" checked>
-              <span class="control-label">No Beverage</span>
-              <span class="modifier-price">+$0.00</span>
-            </label>
-            <label class="control-item item-radio">
-              <input type="radio" name="beverage" value="dr-pepper" data-price="1.99">
-              <span class="control-label">Dr Pepper</span>
-              <span class="modifier-price">+$1.99</span>
-            </label>
-            <label class="control-item item-radio">
-              <input type="radio" name="beverage" value="coca-cola" data-price="1.99">
-              <span class="control-label">Coca-Cola</span>
-              <span class="modifier-price">+$1.99</span>
-            </label>
-            <label class="control-item item-radio">
-              <input type="radio" name="beverage" value="jamocha" data-price="3.29">
-              <span class="control-label">Jamocha Shake</span>
-              <span class="modifier-price">+$3.29</span>
-            </label>
-          </div>
-        </fieldset>
-      </form>
+    <main class="app-board">
+        <div id="notes-canvas" class="notes-grid"></div>
     </main>
 
-    <footer class="app-footer">
-      <div class="quantity-container">
-        <button type="button" class="btn-qty" id="qty-decrement" aria-label="Decrease quantity" disabled>&minus;</button>
-        <span id="qty-display" aria-live="polite">1</span>
-        <button type="button" class="btn-qty" id="qty-increment" aria-label="Increase quantity">&plus;</button>
-      </div>
-      <button type="submit" form="customization-form" class="btn-submit" id="btn-submit">
-        <span class="btn-text">Add to Order</span>
-        <span id="total-price-display">$5.99</span>
-      </button>
-    </footer>
-  </div>
-  <script src="main.js"></script>
+    <div id="workspace-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="workspace-title">
+        <div class="modal-surface">
+            <h2 id="workspace-title">Note Composer</h2>
+            <div class="form-group">
+                <label for="workspace-buffer">Note Content</label>
+                <textarea id="workspace-buffer" placeholder="Write your note here... (Max 50 words)"></textarea>
+                <div id="error-banner-empty" class="error-banner hidden" role="alert">Submission blocked: Empty text not allowed.</div>
+                <div id="error-banner-limit" class="error-banner hidden" role="alert">Submission blocked: Max 50 words allowed.</div>
+            </div>
+            <div class="form-actions">
+                <button id="action-cancel" class="btn btn-secondary">Cancel</button>
+                <button id="action-save" class="btn btn-success">Save Note</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
 </body>
 </html>
